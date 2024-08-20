@@ -1,0 +1,333 @@
+
+image:
+  # -- Docker image repository
+  repository: hello/hello
+  # -- Dcoker image tag 
+  tag: latest
+  # -- Docker image pull policy
+  imagePullPolicy: "Always"
+
+# -- Image pull secrets for Docker images
+imagePullSecrets: []
+# # Example:
+# imagePullSecrets:
+#   - name: regcred
+
+# -- old history to retain to allow rollback (default: 3)
+revisionHistoryLimit: 3
+
+global:
+  # -- Global labels
+  labels: {}
+  # # Example:
+  # labels:
+  #   test-global: test
+  # -- Override Global name
+  name: ""
+  # -- Oberride Global namespace
+  namespace: ""
+
+pod:
+  # -- Pod annotations
+  annotations: {}
+  # # Example:
+  # annotations:
+  #   iam.amazonaws.com/role: test-arn
+  # -- Pod labels
+  labels: {}
+  # # Example:
+  # labels:
+  #   test: test
+  # -- Pod securityContext
+  securityContext: {}
+  # # Example:
+  # securityContext:
+  #   runAsUser: 1000
+  #   runAsGroup: 1000
+  #   fsGroup: 1000
+
+# -- Container App securityContext
+securityContext: {}
+# # Example:
+# securityContext:
+#   capabilities:
+#     drop:
+#     - ALL
+#   readOnlyRootFilesystem: true
+#   runAsNonRoot: true
+#   runAsUser: 1000
+
+rollouts:
+  # -- Rollout annotations
+  annotations: {}
+  # -- Rollout labels
+  labels: {}
+
+# -- Container Ports
+containerPorts: []
+# # Example:
+# containerPorts:
+#   - name: rest
+#     containerPort: 5000
+#     protocol: TCP
+
+# -- Resource requests and limits
+resources: {}
+# # Example:
+# resources:
+#   requests:
+#     # -- resource request cpu
+#     cpu: 1000m
+#     # -- resource request memory
+#     memory: 1024Mi
+#   limits:
+#     # -- resource limit cpu
+#     cpu: 1000m
+#     # -- resource limit memory
+#     memory: 1024Mi
+
+# -- Set rollout object update strategy
+strategy: {}
+# Example:
+# strategy:
+#   canary:
+#     trafficRouting:
+#       istio:
+#         virtualService:
+#           name: iep-rnd-hello-vsvc.network
+#           routes:
+#             - primary
+#         destinationRule:
+#           name: iep-rnd-hello-destrule.network
+#           canarySubsetName: canary
+#           stableSubsetName: stable
+#     stpes:
+#       - setWeight: 5
+#       - pause:
+#         duration: 1m
+#       - setWeight: 25
+#       - pause:
+#         duration: 25s
+
+# -- Pod Replicas (default: 2)
+replicas: 2
+# -- Extra environment variables
+extraEnv: []
+# # Example:
+# extraEnv:
+#   - name: CACHE_S3_SERVER_ADDRESS
+#     value: s3.amazonaws.com
+#   - name: CACHE_S3_ACCESS_KEY
+#     valueFrom:
+#       secretKeyRef:
+#         name: s3access
+#         key: accesskey
+
+# -- Extra environment From ConfigMap of Secret
+envFrom: []
+# # Example:
+# envFrom: |
+#   - configMapRef:
+#       name: {{ include "app.name" . }}-env
+#   - secretRef:
+#       name: {{ include "app.name" . }}-env-secret
+
+probe:
+  # -- Liveness probe
+  liveness: {}
+  # # Exmaple:
+  # liveness:
+  #   httpGet:
+  #     path: /
+  #     port: rest
+  # -- Readiness probe
+  readiness: {}
+  # # Exmaple:
+  # readiness:
+  #   httpGet:
+  #     path: /
+  #     port: rest
+  # -- Startup probe
+  startup: {}
+  # # Example:
+  # startup:
+  #   httpGet:
+  #     path: /
+  #     port: rest
+
+# -- Pod topologySpreadConstraints
+topologySpreadConstraints: []
+# # Exmaple:
+# topologySpreadConstraints:
+#   - maxSkew: 1
+#     topologyKey: "capacity-spread"
+#     whenUnsatisfiable: DoNotSchedule
+#   - maxSkew: 1
+#     topologyKey: "topology.kubernetes.io/zone"
+#     whenUnsatisfiable: DoNotSchedule
+
+# -- Pod tolerations
+tolerations: []
+# # Example:
+# tolerations:
+#   - key: CriticalAddonsOnly
+#     operator: Exists
+
+# -- Pod Affinity
+affinity: {}
+# # Example:
+# affinity: |
+#   podAntiAffinity:
+#     requiredDuringSchedulingIgnoredDuringExecution:
+#       - topologyKey: kubernetes.io/hostname
+#         labelSelector:
+#           matchLabels:
+#             {{- include "app.selectorLabels" . | nindent 10 }}
+
+# volumes: []
+# Example:
+# -- Additional volumes (default: /usr/share/zoneinfo/Asia/Seoul)
+volumes:
+  - name: tz-config
+    hostPath:
+      path: /usr/share/zoneinfo/Asia/Seoul
+
+# volumeMounts: []
+# Example:
+# -- Additional volumeMounts (default: /etc/localtime)
+volumeMounts:
+  - name: tz-config
+    mountPath: /etc/localtime
+
+# -- Init Containers
+initContainers: []
+
+# -- Config Secrets
+secrets: []
+# # Example:
+# secrets:
+#   - name: env-secret
+#     data:
+#       MYSQL_PASSWORD: test
+
+# -- Config ConfigMaps
+configMaps: []
+# # Example:
+# configMaps:
+#   - name: env
+#     data:
+#       MYSQL_USER: test1
+#   - name: nginx-config
+#     data:
+#       test
+
+# -- App Extra Command
+command: []
+
+service:
+  # -- Service labels
+  labels: {}
+  # # Exmaple:
+  # labels:
+  #   test: test-svc
+  # -- Service annotations
+  annotations: {}
+  # # Example:
+  # annotations:
+  #   service.beta.kubernetes.io/aws-load-balancer-internal: "false"
+  #   service.beta.kubernetes.io/aws-load-balancer-type: nlb
+  #   service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+  #   service.beta.kubernetes.io/aws-load-balancer-ip-address-type: ipv4
+  #   service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: Name=test-nlb
+  # -- Service ports
+  ports: []
+  # Example:
+  # ports:
+  #   - name: http
+  #     port: 80
+  #     targetPort: rest
+  #     protocol: TCP
+  # -- Service type (default: ClusterIP)
+  type: ClusterIP
+  # NOTE: HeadLess 타입으로 설정하려면 clusterIP: "None" 으로 설정해야합니다.
+  # Example:
+  # -- Service IP (default: "") headless clusterIP: "None"
+  clusterIP: ""
+  # -- Service externalIPs
+  externalIPs: []
+  # -- Service externalTrafficPolicy
+  externalTrafficPolicy: Cluster
+  # -- Service internalTrafficPolicy
+  internalTrafficPolicy: Cluster
+  # -- Service sessionAffinity
+  sessionAffinity: None
+  # -- Service loadBalancerClass
+  loadBalancerClass: ""
+  # -- Service loadBalancerIP
+  loadBalancerIP: ""
+  # -- Service loadBalancerSourceRanges
+  loadBalancerSourceRanges: []
+  # # Example:
+  # loadBalancerSourceRanges:
+  #   - 1.1.1.1/32
+  #   - 2.2.2.2./32
+
+# -- Horizontal Pod Autoscaler
+autoscaler: {}
+# # Exmaple:
+# autoscaler:
+#   labels: {}
+#   minReplicas: 2
+#   maxReplicas: 10
+#   metrics:
+#   - type: Resource
+#     resource:
+#       name: cpu
+#       target:
+#         type: Utilization
+#         averageUtilization: 80
+
+# -- Ingress Configuration
+ingress: {}
+# # Exmaple:
+# ingress:
+#   labels: {}
+#   annotations:
+#     alb.ingress.kubernetes.io/certificate-arn: certificate_arn
+#     alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-2016-08"
+#     alb.ingress.kubernetes.io/backend-protocol: "HTTPS"
+#     alb.ingress.kubernetes.io/scheme: "internet-facing"
+#     alb.ingress.kubernetes.io/target-type: "ip"
+#     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}, {"HTTPS":443}]'
+#     alb.ingress.kubernetes.io/ssl-redirect: "443"
+#     alb.ingress.kubernetes.io/tags: "Name=iepcd-server-rnd-com2us-com"
+#     alb.ingress.kubernetes.io/target-group-attributes: "load_balancing.algorithm.type=least_outstanding_requests"
+#   ingressClassName: "alb"
+#   hostname: "test.com2us.com"
+#   path: "/"
+#   pathType: "Prefix"
+#   servicePort: 80
+#   tls: false
+#   secretName: ""
+#   extraPaths: []
+#   extraHosts: []
+#   extraTls: []
+
+# -- PDB Configuration
+pdb: {}
+# # Exmaple:
+# pdb:
+#   labels: {}
+#   annotations: {}
+#   maxUnavailable: ""
+#   minAvailable: ""
+
+# -- ServiceAccount Configuration
+serviceAccount: {}
+# Example:
+# serviceAccount:
+#   labels: {}
+#   annotations:
+#     eks.amazonaws.com/role-arn: arn:aws:iam::111111111111:role/test-role
+#   automountServiceAccountToken: false
+#   imagePullSecrets: []

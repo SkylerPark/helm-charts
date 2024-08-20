@@ -1,0 +1,14 @@
+{{- if .Values.configMaps }}
+{{- $name := include "app.name" . }}
+{{- $namespace := include "app.namespace" . }}
+{{- range .Values.configMaps }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-{{ .name }}
+  namespace: {{ $namespace }}
+data:
+  {{- toYaml .data | nindent 2 }}
+---
+{{- end }}
+{{- end }}

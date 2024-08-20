@@ -1,0 +1,117 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "app.name" . }}
+  namespace: {{ include "app.namespace" . }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+  {{- if .Values.rollouts.annotations }}
+  annotations:
+    {{- toYaml .Values.rollouts.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  revisionHistoryLimit: {{ default 3 .Values.revisionHistoryLimit }}
+  {{- if and (not .Values.autoscaler) (not (eq nil .Values.replicas)) }}
+  replicas: {{ .Values.replicas }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- if .Values.pod.annotations }}
+      annotations:
+        {{- include "app.podAnnotations" . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "app.labels" . | nindent 8 }}
+        {{- with .Values.pod.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.pod.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- tpl  . $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- tpl . $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- range $constraint := . }}
+        - {{ toYaml $constraint | nindent 10 | trim }}
+          {{- if not $constraint.labelSelector }}
+          labelSelector:
+            matchLabels:
+              {{- include "app.selectorLabels" $ | nindent 14 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.serviceAccount }}
+      serviceAccountName: {{ include "app.name" . }}
+      {{- end }}
+      containers:
+        - name: {{ include "app.name" . }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "app.image" . }}
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          {{- with .Values.containerPorts }}
+          ports:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.probe.liveness }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.probe.readiness }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.probe.startup }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.envFrom }}
+          envFrom:
+            {{- tpl . $ | nindent 12 }}
+          {{- end }}

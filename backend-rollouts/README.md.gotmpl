@@ -1,0 +1,35 @@
+{{ template "chart.header" . }}
+{{ template "chart.description" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
+
+## Prerequisites
+
+- Kubernetes 1.29+
+
+## Installation
+
+### From source
+
+```console
+$ cd helm-backend-rollouts/
+$ helm install my-app ./{{ template "chart.name" . }} 
+```
+
+## Development
+
+### Testing
+
+```
+$ helm template .
+```
+
+## Uninstall
+
+```console
+$ helm uninstall my-app
+```
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}

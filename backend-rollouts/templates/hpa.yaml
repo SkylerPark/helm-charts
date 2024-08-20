@@ -1,0 +1,26 @@
+{{- if .Values.autoscaler }}
+apiVersion: {{ .Values.autoscaler.version }}
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "app.name" . }}
+  namespace: {{ include "app.namespace" . }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    {{- with .Values.autoscaler.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+    name: {{ include "app.name" . }}
+  minReplicas: {{ default 1 .Values.autoscaler.minReplicas }}
+  maxReplicas: {{ default 1 .Values.autoscaler.maxReplicas }}
+  {{- with .Values.autoscaler.target }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+  {{- with .Values.autoscaler.metrics }}
+  metrics:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
